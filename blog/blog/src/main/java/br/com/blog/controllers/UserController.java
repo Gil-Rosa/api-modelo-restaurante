@@ -27,6 +27,7 @@ import br.com.blog.models.Papel;
 import br.com.blog.models.Usuario;
 import br.com.blog.repositories.PapelRepository;
 import br.com.blog.repositories.UserRepository;
+
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping
@@ -38,24 +39,37 @@ public class UserController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	 
 	@PostMapping("/cadastrar/register")
-	public ResponseEntity<String> registerUser(@Valid Usuario user) {
+	public ResponseEntity<Object> registerUser(@Valid Usuario user) {
 		
-		List<Papel> papeis = new ArrayList<Papel>();
+		if (userRepository.findByEmail(user.getEmail()) != null) {
+			return ResponseEntity.badRequest().body("Email already exists");
+		}
+		if (userRepository.findByLogin(user.getLogin()) != null) {
+			return ResponseEntity.badRequest().body("login already exists");
+		}
+		
+		
+        List<Papel> papeis = new ArrayList<Papel>();
 		
 		if (!userRepository.existsByPapeisNome("ADMIN")) {
 			
 			Papel papel = papelRepository.findByNome("ADMIN");
 			papeis.add(papel);
 			user.setPapeis(papeis);
-		} else  {return ResponseEntity.badRequest().body("usuario admin dessa pagina ja existe");
-					}
-
-		user.setPassword(passwordEncoder.encode(user.getPassword())); 
+		} else  {
+			Papel papel = papelRepository.findByNome("USER");
+			
+			papeis.add(papel);
+			user.setPapeis(papeis);
+		
+		
+		}
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		userRepository.save(user);
 		return ResponseEntity.ok("User registered successfully");
 	}
+
 	@GetMapping("/usuarios")
 	public ResponseEntity<Page<Usuario>> getAllParkingSpots(
 			@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -64,31 +78,31 @@ public class UserController {
 
 	@PutMapping("/usuarios/{id}")
 	public ResponseEntity<String> updateUser(@PathVariable UUID id, @Valid Usuario user) {
-	Usuario existingUser = userRepository.findById(id).orElse(null);
-	if (existingUser == null) {
-	return ResponseEntity.notFound().build();
-	}
-	if (!existingUser.getEmail().equals(user.getEmail()) && userRepository.findByEmail(user.getEmail()) != null) {
-	return ResponseEntity.badRequest().body("Email already exists");
-	}
-	if (!existingUser.getLogin().equals(user.getLogin()) && userRepository.findByLogin(user.getLogin()) != null) {
-	return ResponseEntity.badRequest().body("login already exists");
-	}
-	existingUser.setNome(user.getNome());
-	existingUser.setEmail(user.getEmail());
-	existingUser.setLogin(user.getLogin());
-	existingUser.setPassword(passwordEncoder.encode(user.getPassword())); 
-	userRepository.save(existingUser);
-	return ResponseEntity.ok("User updated successfully");
+		Usuario existingUser = userRepository.findById(id).orElse(null);
+		if (existingUser == null) {
+			return ResponseEntity.notFound().build();
+		}
+		if (!existingUser.getEmail().equals(user.getEmail()) && userRepository.findByEmail(user.getEmail()) != null) {
+			return ResponseEntity.badRequest().body("Email already exists");
+		}
+		if (!existingUser.getLogin().equals(user.getLogin()) && userRepository.findByLogin(user.getLogin()) != null) {
+			return ResponseEntity.badRequest().body("login already exists");
+		}
+		existingUser.setNome(user.getNome());
+		existingUser.setEmail(user.getEmail());
+		existingUser.setLogin(user.getLogin());
+		existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+		userRepository.save(existingUser);
+		return ResponseEntity.ok("User updated successfully");
 	}
 
 	@DeleteMapping("/usuarios/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable UUID id) {
-	Usuario existingUser = userRepository.findById(id).orElse(null);
-	if (existingUser == null) {
-	return ResponseEntity.notFound().build();
-	}
-	userRepository.delete(existingUser);
-	return ResponseEntity.ok("User deleted successfully");
+		Usuario existingUser = userRepository.findById(id).orElse(null);
+		if (existingUser == null) {
+			return ResponseEntity.notFound().build();
+		}
+		userRepository.delete(existingUser);
+		return ResponseEntity.ok("User deleted successfully");
 	}
 }

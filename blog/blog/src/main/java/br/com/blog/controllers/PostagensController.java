@@ -21,34 +21,34 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.blog.models.Postagens;
-import br.com.blog.repositories.PostagengsRepository;
+import br.com.blog.models.Postagem;
+import br.com.blog.repositories.PostagemRepository;
 
 @RestController
 @RequestMapping("/blog")
 public class PostagensController {
 	@Autowired
-	PostagengsRepository postagengsRepository;
+	PostagemRepository postagemRepository;
 	
 	@PostMapping("/user/criar")
-	public ResponseEntity<Object> setPostagens(@Valid Postagens postagens) {
-		if (postagengsRepository.existsByTitulo(postagens.getTitulo())) {
+	public ResponseEntity<Object> setPostagens(@Valid Postagem postagem) {
+		if (postagemRepository.existsByTitulo(postagem.getTitulo())) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("ja existe esse titulo");
 		}
-	postagens.setDate(LocalDateTime.now(ZoneId.of("UTC")));
-		return ResponseEntity.status(HttpStatus.CREATED).body(postagengsRepository.save(postagens));
+	postagem.setDate(LocalDateTime.now(ZoneId.of("UTC")));
+		return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem));
 	
 	}
 	
 	@GetMapping("/ver")
-	public ResponseEntity<Page<Postagens>> getAllComidas(
+	public ResponseEntity<Page<Postagem>> getAllComidas(
 			@PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-		return ResponseEntity.status(HttpStatus.OK).body(postagengsRepository.findAll(pageable));
+		return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.findAll(pageable));
 	}
 
 	@GetMapping("/ver/{id}")
 	public ResponseEntity<Object> getOneComida(@PathVariable(value = "id") Long id) {
-		Optional<Postagens> postagemOptional = postagengsRepository.findById(id);
+		Optional<Postagem> postagemOptional = postagemRepository.findById(id);
 		if (!postagemOptional.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("nao existe postagens.");
 		}
@@ -56,27 +56,27 @@ public class PostagensController {
 	}
 	@DeleteMapping("/user/delete/{id}")
 	public ResponseEntity<Object> deleteComida(@PathVariable(value = "id") Long id) {
-		Optional<Postagens> postegemOptional = postagengsRepository.findById(id);
+		Optional<Postagem> postegemOptional = postagemRepository.findById(id);
 		if (!postegemOptional.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("postagem nao existe.");
 		}
-		postagengsRepository.delete(postegemOptional.get());
+		postagemRepository.delete(postegemOptional.get());
 		return ResponseEntity.status(HttpStatus.OK).body("postagem deleted successfully.");
 	}
 
 	@PutMapping("/user/atualizar/{id}")
 	public ResponseEntity<Object> updateComida(@PathVariable(value = "id") Long id,
-	@Valid Postagens postagens) {
-	Optional<Postagens> postagensOptional = postagengsRepository.findById(id);
+	@Valid Postagem postagem) {
+	Optional<Postagem> postagensOptional = postagemRepository.findById(id);
 	if (!postagensOptional.isPresent()) {
 	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("postagem nao existe.");
 	}
-	Postagens postagemAtualizada = postagensOptional.get();
+	Postagem postagemAtualizada = postagensOptional.get();
 	// Mantém a data original
 	LocalDateTime dataCriacao = postagemAtualizada.getDate();
-	postagemAtualizada = postagens;
+	postagemAtualizada = postagem;
 	postagemAtualizada.setDate(dataCriacao);
 	postagemAtualizada.setId(id);
-	return ResponseEntity.status(HttpStatus.OK).body(postagengsRepository.save(postagemAtualizada));
+	return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagemAtualizada));
 	}
 }

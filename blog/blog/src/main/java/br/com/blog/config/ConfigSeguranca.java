@@ -21,6 +21,7 @@ public class ConfigSeguranca {
 		.and()
 		.authorizeHttpRequests()
 		.antMatchers("/cadastrar/register").permitAll()
+		.antMatchers("/blog/**/comentarios/").permitAll()
 		.antMatchers(HttpMethod.GET,"/blog/ver/**").permitAll()
 		.antMatchers(HttpMethod.POST,"/blog/user/**").hasAnyAuthority("ADMIN")
 		.anyRequest().authenticated().and()

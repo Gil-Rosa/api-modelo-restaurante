@@ -1,33 +1,45 @@
 package br.com.blog.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-public class Postagens {
+public class Postagem {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
 	@Column(nullable = false)
 	private String titulo;
 	@NotBlank
 	@Column(nullable = false)
-	private String postagem;
+	private String conteudo;
+
 	@Column(nullable = false)
 	@DateTimeFormat
 	private LocalDateTime date;
 
-	public String getPostagem() {
-		return postagem;
+	@OneToMany(mappedBy = "postagem", cascade = CascadeType.ALL)
+	private List<Comentario> comentarios = new ArrayList<>();
+
+	public List<Comentario> getComentarios() {
+		return comentarios;
+	}
+
+	public void setComentarios(List<Comentario> comentarios) {
+		this.comentarios = comentarios;
 	}
 
 	public long getId() {
@@ -36,10 +48,6 @@ public class Postagens {
 
 	public void setId(long id) {
 		this.id = id;
-	}
-
-	public void setPostagem(String postagem) {
-		this.postagem = postagem;
 	}
 
 	public LocalDateTime getDate() {
@@ -56,6 +64,14 @@ public class Postagens {
 
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
+	}
+
+	public String getConteudo() {
+		return conteudo;
+	}
+
+	public void setConteudo(String conteudo) {
+		this.conteudo = conteudo;
 	}
 
 }

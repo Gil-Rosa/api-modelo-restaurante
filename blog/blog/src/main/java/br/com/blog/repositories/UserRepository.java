@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<Usuario, UUID> {
 	public Optional<Usuario> findBynome(String nome);
 	public Usuario findByEmail(String email);
 	boolean existsByPapeisNome(String nomePapel);
+	boolean existsByLogin(String login);
 	       
 
 
